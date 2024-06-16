@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import random
+import time
 
 app = FastAPI()
 
@@ -88,3 +90,20 @@ svg_images = [
 @app.get("/images")
 async def get_images():
     return JSONResponse(content=svg_images)
+
+
+@app.get("/images/{image_id}")
+async def get_image(image_id: int):
+    # Simulate a delay
+    time.sleep(random.uniform(0.5, 5.0))  # Delay between 0.5 and 2.0 seconds
+    
+    # Randomly decide to fail
+    if random.random() < 0.2:  # 20% chance of failure
+        raise HTTPException(status_code=500, detail="Internal server error")
+    
+    # Find the image by ID
+    for image in svg_images:
+        if image["id"] == image_id:
+            return JSONResponse(content=image)
+    
+    raise HTTPException(status_code=404, detail="Image not found")
