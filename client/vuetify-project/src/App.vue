@@ -3,9 +3,6 @@
     <v-container>
       <v-row>
         <v-col cols="12">
-          <v-text-field v-model="search" label="Search" append-icon="mdi-magnify"></v-text-field>
-        </v-col>
-        <v-col cols="12">
           <ImgList />
         </v-col>
       </v-row>

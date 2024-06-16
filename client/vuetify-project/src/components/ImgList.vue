@@ -137,7 +137,11 @@ export default {
     console.log('Component mounted');
     this.fetchData();
     this.checkNewImages();
-    setInterval(this.checkNewImages, 2000);
+    this.newImagesInterval = setInterval(this.checkNewImages, 2000); // Co minutę sprawdzaj nowe obrazki
+  },
+  beforeDestroy() {
+    // Clear the interval when the component is destroyed to avoid memory leaks
+    clearInterval(this.newImagesInterval);
   },
 };
 </script>
