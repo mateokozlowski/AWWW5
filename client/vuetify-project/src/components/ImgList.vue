@@ -11,6 +11,10 @@
         ></v-text-field>
       </v-col>
     </v-row>
+    <v-chip v-if="newImagesCount" color="green">
+      {{ newImagesCount }} new images available
+      <v-btn small @click="refreshImages">Refresh</v-btn>
+    </v-chip>
     <v-list>
       <v-list-item v-for="(image, index) in filteredImages" :key="index">
         <v-list-item-title>Image Slot {{ index + 1 }}</v-list-item-title>
@@ -25,9 +29,6 @@
       @input="onPageChange"
     ></v-pagination>
     <v-dialog v-model="dialog" width="500">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
-      </template>
       <v-card>
         <v-card-title class="headline">Image</v-card-title>
         <v-card-text>
@@ -51,6 +52,7 @@ export default {
   data() {
     return {
       images: [],
+      newImagesCount: 0,
       page: 1,
       itemsPerPage: 4,
       search: '',
@@ -87,12 +89,27 @@ export default {
         const data = await response.json();
         console.log('Fetched data:', data);
         this.images = data;
+        this.newImagesCount = 0;  // Reset the new images count after fetching data
       } catch (error) {
         console.error('Fetch error:', error);
       }
     },
-    onPageChange() {
-      window.scrollTo(0, 0);
+    async checkNewImages() {
+      console.log('checkNewImages called');
+      try {
+        const response = await fetch('http://127.0.0.1:8000/new-images');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('New images data:', data);
+        this.newImagesCount += data.new_images;
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    },
+    async refreshImages() {
+      await this.fetchData();
     },
     async showImage(imageId) {
       this.dialog = true;
@@ -112,10 +129,15 @@ export default {
         this.loading = false;
       }
     },
+    onPageChange() {
+      window.scrollTo(0, 0);
+    },
   },
   mounted() {
     console.log('Component mounted');
     this.fetchData();
+    this.checkNewImages();
+    setInterval(this.checkNewImages, 2000);
   },
 };
 </script>

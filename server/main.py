@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import random
 import time
+import string
 
 app = FastAPI()
 
@@ -107,3 +108,17 @@ async def get_image(image_id: int):
             return JSONResponse(content=image)
     
     raise HTTPException(status_code=404, detail="Image not found")
+
+
+@app.get("/new-images")
+async def get_new_images():
+    if random.random() < 0.5:
+        new_image = {
+            "id": len(svg_images) + 1,
+            "svg": f'<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect x="{random.randint(0, 80)}" y="{random.randint(0, 80)}" width="20" height="20" style="fill:rgb({random.randint(0, 255)},{random.randint(0, 255)},{random.randint(0, 255)});" /></svg>',
+            "tags": ["new", ''.join(random.choices(string.ascii_lowercase, k=5))]
+        }
+        svg_images.append(new_image)
+        return JSONResponse(content={"new_images": 1})
+    else:
+        return JSONResponse(content={"new_images": 0})
